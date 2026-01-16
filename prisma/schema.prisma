@@ -1,0 +1,47 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+model Score {
+  id           String         @id @default(uuid())
+  userId       String         @map("user_id")
+  currentScore Int            @map("current_score")
+  riskLevel    String?        @map("risk_level")
+  updatedAt    DateTime       @default(now()) @map("updated_at")
+
+  history      ScoreHistory[]
+  factors      ScoreFactor[]
+
+  @@map("scores")
+  @@index([userId])
+}
+
+model ScoreHistory {
+  id             String   @id @default(uuid())
+  scoreId        String   @map("score_id")
+  scoreValue     Int      @map("score_value")
+  referenceMonth DateTime @map("reference_month")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  score          Score    @relation(fields: [scoreId], references: [id])
+
+  @@map("score_history")
+}
+
+model ScoreFactor {
+  id          String   @id @default(uuid())
+  scoreId     String   @map("score_id")
+  factorType  String   @map("factor_type")
+  impactValue Int?     @map("impact_value")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  score       Score    @relation(fields: [scoreId], references: [id])
+
+  @@map("score_factors")
+}
